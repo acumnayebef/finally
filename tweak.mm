@@ -9,7 +9,7 @@ extern "C" {
 
 // --- КОНФИГ ---
 // false = меню без хуков (тест: если игра перестала вылетать, виноваты хуки)
-constexpr bool kInstallHooks = true;
+constexpr bool kInstallHooks = false;
 
 // --- ЧАСТЬ 1: ГЛОБАЛЬНЫЕ ФЛАГИ И ЛОГИКА ВЗЛОМА ПАМЯТИ ---
 
