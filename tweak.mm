@@ -77,9 +77,7 @@ void new_HR_MainMenuHandler_Start(void* instance) {
 
 // Установка хуков (RVA от базы UnityFramework)
 static void hook_one(uintptr_t base, uintptr_t rva, void* replacement, void** original) {
-    DobbyHook((void*)(base + rva),
-              (dobby_dummy_func_t)replacement,
-              (dobby_dummy_func_t*)original);
+    DobbyHook((void*)(base + rva), replacement, original);
 }
 
 static void install_hooks() {
