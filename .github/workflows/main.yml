@@ -29,8 +29,6 @@ jobs:
           echo "found: $LIB"
           echo "DOBBY_LIB=$GITHUB_WORKSPACE/$LIB" >> $GITHUB_ENV
 
-      
-
       - name: Build Code
         run: |
           xcrun -sdk iphoneos clang++ -arch arm64 -std=c++17 -fobjc-arc \
