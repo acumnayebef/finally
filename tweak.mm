@@ -8,8 +8,9 @@ extern "C" {
 }
 
 // --- КОНФИГ ---
-// false = меню без хуков (тест: если игра перестала вылетать, виноваты хуки)
+// false = без хуков (не падает на сайдлоаде без JIT). true = хуки через Dobby, нужен JIT
 constexpr bool kInstallHooks = false;
+constexpr double kPollSeconds = 0.5;
 
 // --- ЧАСТЬ 1: ГЛОБАЛЬНЫЕ ФЛАГИ И ЛОГИКА ВЗЛОМА ПАМЯТИ ---
 
@@ -34,7 +35,7 @@ void (*old_HR_PlayerHandler_Update)(void* instance);
 void (*old_GamePlayScoresManager_Update)(void* instance);
 void (*old_HR_MainMenuHandler_Start)(void* instance);
 
-// 1. Бессмертие
+// 1. Бессмертие (только с хуками)
 void new_HR_PlayerHandler_OnCollisionEnter(void* instance, void* collision) {
     if (godModeEnabled) {
         return;
@@ -44,7 +45,7 @@ void new_HR_PlayerHandler_OnCollisionEnter(void* instance, void* collision) {
     }
 }
 
-// 2. Заморозка времени гонки на 99
+// 2. Заморозка времени гонки на 99 (только с хуками)
 void new_HR_PlayerHandler_Update(void* instance) {
     if (old_HR_PlayerHandler_Update) {
         old_HR_PlayerHandler_Update(instance);
@@ -54,7 +55,7 @@ void new_HR_PlayerHandler_Update(void* instance) {
     }
 }
 
-// 3. Множитель очков x500
+// 3. Множитель очков x500 (только с хуками)
 void new_GamePlayScoresManager_Update(void* instance) {
     if (old_GamePlayScoresManager_Update) {
         old_GamePlayScoresManager_Update(instance);
@@ -64,7 +65,7 @@ void new_GamePlayScoresManager_Update(void* instance) {
     }
 }
 
-// 4. Разблокировка 1,000,000$
+// 4. Разблокировка 1,000,000$ (с хуками, срабатывает при открытии меню игры)
 void new_HR_MainMenuHandler_Start(void* instance) {
     if (old_HR_MainMenuHandler_Start) {
         old_HR_MainMenuHandler_Start(instance);
@@ -92,6 +93,19 @@ static void install_hooks() {
     hook_one(base, 0x3E443E0, (void*)new_HR_PlayerHandler_Update,           (void**)&old_HR_PlayerHandler_Update);
     hook_one(base, 0x3BA37D8, (void*)new_GamePlayScoresManager_Update,      (void**)&old_GamePlayScoresManager_Update);
     hook_one(base, 0x3E3CF58, (void*)new_HR_MainMenuHandler_Start,          (void**)&old_HR_MainMenuHandler_Start);
+}
+
+// Режим без хуков: таймер пишет значение в синглтон, патч кода не нужен
+static void poll_tick() {
+    uintptr_t base = get_UnityFramework_BaseAddress();
+    if (!base) return;
+    if (moneyHackEnabled) {
+        void* (*getInstance)() = (void*(*)())(base + 0x3E37DA8);
+        void* props = getInstance();
+        if (props) {
+            *(bool*)((uintptr_t)props + 0x50) = true;
+        }
+    }
 }
 
 // --- ЧАСТЬ 2: ГРАФИЧЕСКИЙ ИНТЕРФЕЙС МЕНЮ В КОСМИЧЕСКОМ СТИЛЕ ---
@@ -290,7 +304,7 @@ static void install_hooks() {
 
 @end
 
-// --- ЗАПУСК: МЕНЮ + УСТАНОВКА ХУКОВ ---
+// --- ЗАПУСК: МЕНЮ + ХУКИ ИЛИ ТАЙМЕР ---
 
 @interface HookManager : NSObject
 @end
@@ -304,6 +318,9 @@ static void install_hooks() {
         if (kInstallHooks) {
             install_hooks();
         }
+        [NSTimer scheduledTimerWithTimeInterval:kPollSeconds repeats:YES block:^(NSTimer *t) {
+            poll_tick();
+        }];
     });
 }
 
