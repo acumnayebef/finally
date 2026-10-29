@@ -7,6 +7,10 @@ extern "C" {
 #include "dobby.h"
 }
 
+// --- КОНФИГ ---
+// false = меню без хуков (тест: если игра перестала вылетать, виноваты хуки)
+constexpr bool kInstallHooks = true;
+
 // --- ЧАСТЬ 1: ГЛОБАЛЬНЫЕ ФЛАГИ И ЛОГИКА ВЗЛОМА ПАМЯТИ ---
 
 BOOL godModeEnabled = NO;
@@ -22,7 +26,7 @@ uintptr_t get_UnityFramework_BaseAddress() {
             return (uintptr_t)_dyld_get_image_header(i);
         }
     }
-    return (uintptr_t)_dyld_get_image_header(0);
+    return 0;
 }
 
 void (*old_HR_PlayerHandler_OnCollisionEnter)(void* instance, void* collision);
@@ -67,6 +71,7 @@ void new_HR_MainMenuHandler_Start(void* instance) {
     }
     if (moneyHackEnabled) {
         uintptr_t unityBase = get_UnityFramework_BaseAddress();
+        if (!unityBase) return;
         void* (*HR_HighwayRacerProperties_get_Instance)() = (void*(*)())(unityBase + 0x3E37DA8);
         void* propertiesAsset = HR_HighwayRacerProperties_get_Instance();
         if (propertiesAsset != nullptr) {
@@ -82,6 +87,7 @@ static void hook_one(uintptr_t base, uintptr_t rva, void* replacement, void** or
 
 static void install_hooks() {
     uintptr_t base = get_UnityFramework_BaseAddress();
+    if (!base) return;
     hook_one(base, 0x3E452A4, (void*)new_HR_PlayerHandler_OnCollisionEnter, (void**)&old_HR_PlayerHandler_OnCollisionEnter);
     hook_one(base, 0x3E443E0, (void*)new_HR_PlayerHandler_Update,           (void**)&old_HR_PlayerHandler_Update);
     hook_one(base, 0x3BA37D8, (void*)new_GamePlayScoresManager_Update,      (void**)&old_GamePlayScoresManager_Update);
@@ -239,7 +245,7 @@ static void install_hooks() {
         UIButton *tgButton = [UIButton buttonWithType:UIButtonTypeCustom];
         tgButton.frame = CGRectMake(35, 95, 240, 45);
         tgButton.backgroundColor = [UIColor colorWithRed:0.00 green:0.53 blue:0.82 alpha:1.0];
-        [tgButton setTitle:@"@xantapers" forState:UIControlStateNormal];
+        [tgButton setTitle:@"@devxantapers" forState:UIControlStateNormal];
         [tgButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         tgButton.titleLabel.font = [UIFont fontWithName:@"CourierNewPS-BoldMT" size:18];
         tgButton.layer.cornerRadius = 8;
@@ -274,11 +280,11 @@ static void install_hooks() {
 - (void)moneyToggled:(UISwitch *)sender { moneyHackEnabled = sender.isOn; }
 
 - (void)openTelegram {
-    NSURL *tgURL = [NSURL URLWithString:@"tg://resolve?domain=xantaperss"];
+    NSURL *tgURL = [NSURL URLWithString:@"tg://resolve?domain=devxantapers"];
     if ([[UIApplication sharedApplication] canOpenURL:tgURL]) {
         [[UIApplication sharedApplication] openURL:tgURL options:@{} completionHandler:nil];
     } else {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://t.me/xantapers"] options:@{} completionHandler:nil];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://t.me/devxantapers"] options:@{} completionHandler:nil];
     }
 }
 
@@ -295,7 +301,9 @@ static void install_hooks() {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         static CosmicMenuWindow *menuInstance = nil;
         menuInstance = [[CosmicMenuWindow alloc] init];
-        install_hooks();
+        if (kInstallHooks) {
+            install_hooks();
+        }
     });
 }
 
