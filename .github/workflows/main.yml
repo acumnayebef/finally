@@ -1,0 +1,45 @@
+name: Build Dylib
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Dobby
+        run: |
+          git clone --depth 1 https://github.com/jmpews/Dobby.git
+          cmake -S Dobby -B Dobby/build \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphoneos \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DDOBBY_GENERATE_SHARED=OFF \
+            -DPlugin.SymbolResolver=OFF
+          cmake --build Dobby/build -j4
+          LIB=$(find Dobby/build -name "libdobby.a" | head -n 1)
+          echo "found: $LIB"
+          echo "DOBBY_LIB=$GITHUB_WORKSPACE/$LIB" >> $GITHUB_ENV
+
+      - name: Build Code
+        run: |
+          xcrun -sdk iphoneos clang++ -arch arm64 -std=c++17 -fobjc-arc \
+            -miphoneos-version-min=14.0 -dynamiclib \
+            -framework UIKit -framework Foundation -framework CoreGraphics -framework QuartzCore \
+            -IDobby/include \
+            -install_name @rpath/Xantapersdev.dylib \
+            -o Xantapersdev.dylib tweak.mm \
+            "$DOBBY_LIB" -lc++
+
+      - name: Upload Finished Dylib
+        uses: actions/upload-artifact@v4
+        with:
+          name: Xantapersdev
+          path: Xantapersdev.dylib
