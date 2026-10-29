@@ -179,7 +179,7 @@ static void install_hooks() {
     [self.menuView addSubview:blurView];
 
     UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 12, 340, 30)];
-    titleLabel.text = @"DEVXANTAPERS OS v1.0";
+    titleLabel.text = @"XANTAPERS OS v1.0";
     titleLabel.textColor = [UIColor colorWithRed:0.00 green:0.80 blue:1.00 alpha:1.0];
     titleLabel.font = [UIFont fontWithName:@"CourierNewPS-BoldMT" size:18];
     titleLabel.textAlignment = NSTextAlignmentCenter;
@@ -245,7 +245,7 @@ static void install_hooks() {
         UIButton *tgButton = [UIButton buttonWithType:UIButtonTypeCustom];
         tgButton.frame = CGRectMake(35, 95, 240, 45);
         tgButton.backgroundColor = [UIColor colorWithRed:0.00 green:0.53 blue:0.82 alpha:1.0];
-        [tgButton setTitle:@"@devxantapers" forState:UIControlStateNormal];
+        [tgButton setTitle:@"@xantapers" forState:UIControlStateNormal];
         [tgButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         tgButton.titleLabel.font = [UIFont fontWithName:@"CourierNewPS-BoldMT" size:18];
         tgButton.layer.cornerRadius = 8;
@@ -280,11 +280,11 @@ static void install_hooks() {
 - (void)moneyToggled:(UISwitch *)sender { moneyHackEnabled = sender.isOn; }
 
 - (void)openTelegram {
-    NSURL *tgURL = [NSURL URLWithString:@"tg://resolve?domain=devxantapers"];
+    NSURL *tgURL = [NSURL URLWithString:@"tg://resolve?domain=xantapers"];
     if ([[UIApplication sharedApplication] canOpenURL:tgURL]) {
         [[UIApplication sharedApplication] openURL:tgURL options:@{} completionHandler:nil];
     } else {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://t.me/devxantapers"] options:@{} completionHandler:nil];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://t.me/xantapers"] options:@{} completionHandler:nil];
     }
 }
 
