@@ -239,7 +239,7 @@ static void install_hooks() {
         UIButton *tgButton = [UIButton buttonWithType:UIButtonTypeCustom];
         tgButton.frame = CGRectMake(35, 95, 240, 45);
         tgButton.backgroundColor = [UIColor colorWithRed:0.00 green:0.53 blue:0.82 alpha:1.0];
-        [tgButton setTitle:@"@devxantapers" forState:UIControlStateNormal];
+        [tgButton setTitle:@"@xantapers" forState:UIControlStateNormal];
         [tgButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
         tgButton.titleLabel.font = [UIFont fontWithName:@"CourierNewPS-BoldMT" size:18];
         tgButton.layer.cornerRadius = 8;
@@ -274,11 +274,11 @@ static void install_hooks() {
 - (void)moneyToggled:(UISwitch *)sender { moneyHackEnabled = sender.isOn; }
 
 - (void)openTelegram {
-    NSURL *tgURL = [NSURL URLWithString:@"tg://resolve?domain=devxantapers"];
+    NSURL *tgURL = [NSURL URLWithString:@"tg://resolve?domain=xantaperss"];
     if ([[UIApplication sharedApplication] canOpenURL:tgURL]) {
         [[UIApplication sharedApplication] openURL:tgURL options:@{} completionHandler:nil];
     } else {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://t.me/devxantapers"] options:@{} completionHandler:nil];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://t.me/xantapers"] options:@{} completionHandler:nil];
     }
 }
 
